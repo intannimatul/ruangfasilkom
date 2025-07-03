@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diagnosis Awal Gangguan Psikologis Anak</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-100 to-purple-200 min-h-screen flex flex-col items-center justify-start p-6">
+
+  <!-- Halaman Welcome -->
+  <div id="pageWelcome" class="text-center mt-10 max-w-2xl">
+    <h1 class="text-4xl font-bold text-indigo-700 mb-4">Selamat Datang 👋</h1>
+    <p class="text-lg text-gray-700">Platform ini membantu mendiagnosis gangguan psikologis anak secara awal menggunakan metode <strong>Fuzzy Logic</strong> &amp; <strong>Backward Chaining</strong>.</p>
+    <p class="text-md text-gray-600 mt-2">Pilih gejala yang dialami anak Anda dan dapatkan hasil diagnosa dalam hitungan detik.</p>
+    <button id="startBtn" class="mt-6 bg-indigo-600 text-white px-6 py-2 rounded-full shadow hover:bg-indigo-700 transition">Mulai Diagnosa</button>
+  </div>
+
+  <!-- Halaman Form Diagnosa -->
+  <div id="pageForm" class="hidden w-full max-w-2xl mt-12 bg-white p-6 rounded-xl shadow-md">
+    <h2 class="text-2xl font-semibold text-indigo-700 mb-4">Checklist Gejala Anak</h2>
+    <form id="formGejala" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto"></form>
+    <div class="flex justify-center mt-6">
+      <button type="button" id="diagnosaBtn" class="bg-purple-600 text-white px-6 py-2 rounded-full shadow hover:bg-purple-700 transition">Diagnosa Sekarang</button>
+    </div>
+  </div>
+
+  <!-- Halaman Hasil Diagnosa -->
+  <div id="pageHasil" class="hidden w-full max-w-2xl mt-12 bg-white p-6 rounded-xl shadow-md text-center text-gray-800">
+    <h2 class="text-2xl font-semibold text-indigo-700 mb-4">Hasil Diagnosis</h2>
+    <div id="hasilDiagnosa"></div>
+  </div>
+
+  <script>
+    const gejalaList = {
+      G1: "Anak merasa cemas atau gelisah tanpa alasan jelas",
+      G2: "Anak sering mengalami kesulitan tidur atau insomnia",
+      G3: "Anak menghindari situasi sosial atau interaksi dengan orang lain",
+      G4: "Anak sering berkeringat dan ketegangan fisik saat cemas",
+      G5: "Anak mengalami halusinasi (melihat atau mendengar sesuatu yang tidak nyata)",
+      G6: "Anak memiliki delusi (keyakinan yang salah/tidak logis)",
+      G7: "Ucapan anak sering tidak nyambung atau melantur",
+      G8: "Anak menunjukkan ekspresi wajah datar dalam percakapan",
+      G9: "Perilaku anak aneh atau tidak sesuai konteks sosial",
+      G10: "Anak memiliki pengalaman traumatis sebelumnya",
+      G11: "Anak sering terbangun karena mimpi buruk atau kilas balik",
+      G12: "Anak menghindari hal-hal yang mengingatkan pada trauma",
+      G13: "Anak sangat mudah marah atau emosi tidak stabil",
+      G14: "Anak mudah terkejut dan selalu waspada",
+      G15: "Anak sulit fokus dalam jangka waktu lama",
+      G16: "Anak tidak bisa duduk diam dan sering bergerak",
+      G17: "Anak mudah teralihkan oleh hal kecil di sekitarnya",
+      G18: "Anak impulsif dan sering bertindak tanpa berpikir",
+      G19: "Anak sulit menjalin kontak mata saat berbicara",
+      G20: "Anak menggunakan bahasa tubuh yang kaku atau tidak wajar",
+      G21: "Anak mengulang gerakan atau ucapan secara terus-menerus",
+      G22: "Anak kesulitan menyelesaikan tugas sederhana",
+      G23: "Anak tidak merespons suara atau sentuhan secara normal",
+      G24: "Anak kesulitan berinteraksi atau berteman",
+      G25: "Anak tidak merasa bersalah setelah melakukan kesalahan",
+      G26: "Anak sering memanipulasi dan berbohong",
+      G27: "Anak tidak mau bertanggung jawab atas kesalahan",
+      G28: "Anak kurang empati terhadap perasaan orang lain",
+      G29: "Anak kesulitan membaca dan mengeja kata sederhana",
+      G30: "Anak sering membalik huruf seperti 'b' dan 'd', 'm' dan 'w'",
+      G31: "Anak lambat memahami bacaan atau instruksi tertulis",
+      G32: "Anak kesulitan mengingat kata atau angka",
+      G33: "Anak sangat lambat dalam mempelajari hal baru",
+      G34: "Anak butuh bantuan dalam aktivitas dasar sehari-hari",
+      G35: "Anak memiliki tingkat IQ yang tergolong rendah",
+      G36: "Anak tidak mampu menahan dorongan melakukan sesuatu (kompulsif)",
+      G37: "Anak merasa lega setelah melakukan sesuatu yang diulang-ulang",
+      G38: "Anak kecanduan gadget/game/TV dan tidak bisa berhenti",
+      G39: "Anak merasa asing terhadap dirinya sendiri atau lingkungan (depersonalisasi)"
+    };
+
+    const penyakitDict = {
+      "Anxiety Disorder": {G1:20,G2:20,G3:20,G4:20,G13:10,G14:10},
+      "Psychotic Disorder": {G5:30,G6:30,G7:10,G9:30},
+      "PTSD": {G3:20,G10:30,G11:20,G12:20,G23:10},
+      "ADHD": {G15:20,G16:20,G17:20,G18:20,G22:10,G29:10},
+      "Autism Spectrum Disorder": {G19:20,G20:20,G21:20,G23:20,G24:20},
+      "Psychopathy": {G13:20,G25:20,G26:20,G27:20,G28:20},
+      "Disleksia": {G29:27.27,G30:27.27,G31:27.27,G32:9.09,G33:9.09},
+      "Retardasi Mental": {G22:30,G27:10,G33:20,G34:20,G35:20},
+      "Impulse Control Disorder": {G17:10,G18:30,G36:30,G37:20,G38:10},
+      "Dissociative Disorder": {G3:10,G8:10,G10:30,G14:20,G39:30}
+    };
+
+    const deskripsiPenyakit = {
+      "Anxiety Disorder": "Gangguan kecemasan yang menyebabkan anak merasa takut, khawatir, atau gelisah berlebihan tanpa alasan jelas.",
+      "Psychotic Disorder": "Gangguan jiwa serius yang menyebabkan anak kesulitan membedakan antara kenyataan dan halusinasi atau delusi.",
+      "PTSD": "Post-Traumatic Stress Disorder adalah kondisi psikologis akibat pengalaman traumatis yang mendalam.",
+      "ADHD": "Attention Deficit Hyperactivity Disorder, gangguan yang membuat anak sulit fokus, hiperaktif, dan impulsif.",
+      "Autism Spectrum Disorder": "Gangguan perkembangan yang memengaruhi kemampuan komunikasi, interaksi sosial, dan perilaku.",
+      "Psychopathy": "Gangguan kepribadian di mana anak menunjukkan kurangnya empati, manipulatif, dan perilaku antisosial.",
+      "Disleksia": "Kesulitan belajar khusus yang mempengaruhi kemampuan membaca, mengeja, dan menulis.",
+      "Retardasi Mental": "Gangguan perkembangan intelektual dengan IQ rendah dan kesulitan menjalani aktivitas sehari-hari.",
+      "Impulse Control Disorder": "Gangguan yang membuat anak sulit mengendalikan dorongan untuk melakukan tindakan berulang atau berbahaya.",
+      "Dissociative Disorder": "Gangguan yang membuat anak merasa terlepas dari realitas atau identitas dirinya sendiri."
+    };
+
+    // Tampilan awal
+    document.getElementById('startBtn').onclick = () => {
+      document.getElementById('pageWelcome').classList.add('hidden');
+      document.getElementById('pageForm').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Generate checkbox
+    const form = document.getElementById('formGejala');
+    for (const [kode, label] of Object.entries(gejalaList)) {
+      const wrapper = document.createElement('label');
+      wrapper.className = 'flex items-start gap-2';
+      wrapper.innerHTML = `<input type="checkbox" name="gejala" value="${kode}" class="mt-1"> ${label}`;
+      form.appendChild(wrapper);
+    }
+
+    document.getElementById('diagnosaBtn').onclick = () => {
+      const selected = Array.from(document.querySelectorAll('input[name="gejala"]:checked')).map(e => e.value);
+      let hasil = {};
+      for (const [penyakit, gejalaSkor] of Object.entries(penyakitDict)) {
+        let totalSkor = 0;
+        for (const [kode, bobot] of Object.entries(gejalaSkor)) {
+          if (selected.includes(kode)) totalSkor += bobot;
+        }
+        if (totalSkor > 0) hasil[penyakit] = totalSkor;
+      }
+
+      function getKategori(score) {
+        const s = parseFloat(score);
+        if (s >= 66) return { label: "Berat", warna: "text-red-600", ikon: "❗" };
+        if (s >= 34) return { label: "Sedang", warna: "text-orange-500", ikon: "⚠️" };
+        return { label: "Ringan", warna: "text-yellow-500", ikon: "ℹ️" };
+      }
+
+      const hasilBox = document.getElementById('hasilDiagnosa');
+      hasilBox.innerHTML = hasil && Object.keys(hasil).length > 0
+        ? Object.entries(hasil)
+            .sort((a, b) => b[1] - a[1])
+            .map(([p, s]) => {
+              const kategori = getKategori(s);
+              return `
+                <div class="mb-6 p-4 border-l-4 ${kategori.warna} bg-gray-50 rounded shadow">
+                  <p class="text-xl font-bold ${kategori.warna}">${kategori.ikon} ${kategori.label} (${s})</p>
+                  <p class="text-lg font-semibold mt-1">${p}</p>
+                  <p class="text-sm text-gray-600 italic mt-1">${deskripsiPenyakit[p]}</p>
+                </div>
+              `;
+            }).join('') +
+            '<p class="mt-6 text-sm text-gray-500 italic">*Hasil ini merupakan indikasi awal dan bukan diagnosis final. Konsultasikan lebih lanjut ke psikolog atau psikiater profesional untuk pemeriksaan menyeluruh.</p>'
+        : '<p class="text-red-600 font-semibold">Tidak ditemukan kecocokan dari gejala yang dipilih.</p>';
+
+      document.getElementById('pageForm').classList.add('hidden');
+      document.getElementById('pageHasil').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+  </script>
+</body>
+</html>
